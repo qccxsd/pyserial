@@ -1,0 +1,49 @@
+import serial , xlrd , xlwt,datetime
+
+time= datetime.datetime.now()
+year = time.strftime('%Y')
+month= time.strftime('%m')
+day= time.strftime('%d')
+printtime = year + month + day
+workbook = xlwt.Workbook()
+sheet1 = workbook.add_sheet('sheet1',cell_overwrite_ok=True)
+sheet1.write(0,0,"ID")
+sheet1.write(0,1,"体温")
+log=0
+ser = serial.Serial()
+line=0
+row=1
+ser.port = "COM4"
+ser.baudrate = 9600
+print(ser)
+ser.open()
+print(ser.is_open)
+num_people=int(input('请输入打卡人数'))
+while(1):
+    
+    print(ser.is_open)
+    s = ser.readline()
+    log+=1
+    data_pre= str(s)
+    did = data_pre[ 2:6 ] 
+    did2 = data_pre[ 6:11 ]
+    did3 = data_pre[ 11:13]
+    did4 = data_pre[ 13:24] 
+
+    sheet1.write(row,line,did4)
+    sheet1.write(row,line+1,did2)
+
+    row+=1
+    num_people-=1
+   
+    if num_people==0:
+        break
+workbook.save('%s.xls'% printtime)
+print('创建excel文件完成!')
+date = xlrd.open_workbook('%s.xls '%printtime)#打开xlsx文件(相对路径)
+table = date.sheets()[0]#打开第一张表
+nrows =table.nrows#获取表的行数
+#for循环逐行输出
+for i in range(nrows):
+    print(table.row_values(i)[:4])#前四行数据
+    
